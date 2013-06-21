@@ -1,0 +1,20 @@
+1.0.3
+
+- better naming for make_averaged_impact()
+- a few minor code improvements
+- improved documentation
+
+1.0.2
+
+- added numpy.asarray(X) to FeatureImpact._evaluate() to ensure
+	safe prediction evaluation
+- adjusted README.txt to include an info about possible features
+
+1.0.1
+
+- added URL to setup script
+- better documentation
+
+1.0.0
+
+- initial release
