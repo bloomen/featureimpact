@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 from distutils.core import setup
-from subprocess import check_call
-import tempfile
+from subprocess import check_call, PIPE
+import sys
 
 
-def get_version():
-    version = tempfile.TemporaryFile()
-    check_call(['git', 'describe', '--tags', '--dirty=M'], stdout=version)
-    version.seek(0)
-    return version.read().strip()
-
+version = 'VERSION.txt'
+if sys.argv[1] == 'sdist':
+    check_call(['git', 'describe', '--tags', '--dirty=M'],
+               stdout=file(version, 'w'), stderr=PIPE)
 
 setup(
     name="featureimpact",
     packages=["featureimpact"],
-    version=get_version(),
+    version=file(version).read().strip(),
     description="Compute the statistical impact of features given a scikit-learn estimator",
     author="Christian Blume",
     author_email="chr.blume@gmail.com",
