@@ -10,7 +10,7 @@ def make_averaged_impact(impact, normalize=False):
     Computes the averaged impact across all events for each feature
 
     :param impact: Array-like object of shape [n_samples, n_features].
-        This should be the return value of FeatureImpact.predict()
+        This should be the return value of FeatureImpact.compute_impact()
     :param normalize: Whether to normalize the averaged impacts such that
         they sum up to one
 

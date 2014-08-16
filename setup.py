@@ -1,10 +1,20 @@
 #!/usr/bin/env python
 from distutils.core import setup
+from subprocess import check_call
+import tempfile
+
+
+def get_version():
+    version = tempfile.TemporaryFile()
+    check_call(['git', 'describe', '--tags'], stdout=version)
+    version.seek(0)
+    return version.read()
+
 
 setup(
     name="featureimpact",
     packages=["featureimpact"],
-    version="1.0.3",
+    version=get_version(),
     description="Compute the statistical impact of features given a scikit-learn estimator",
     author="Christian Blume",
     author_email="chr.blume@gmail.com",
