@@ -43,7 +43,7 @@ def get_features(n_samples, n_features):
     return X
 
 
-def out(value):
+def print_sec(value):
     print("[%ss]" % value, end=' ')
 
 
@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
         fi.make_quantiles(X)
         timer = Timer()
         fi.compute_impact(Model(n_samples), X)
-        out(timer)
+        print_sec(timer)
 
 
 if __name__ == '__main__':

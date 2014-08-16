@@ -6,9 +6,9 @@ import tempfile
 
 def get_version():
     version = tempfile.TemporaryFile()
-    check_call(['git', 'describe', '--tags'], stdout=version)
+    check_call(['git', 'describe', '--tags', '--dirty=M'], stdout=version)
     version.seek(0)
-    return version.read()
+    return version.read().strip()
 
 
 setup(
