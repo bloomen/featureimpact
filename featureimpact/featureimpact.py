@@ -16,11 +16,11 @@ def make_averaged_impact(impact, normalize=False):
 
     :returns: The averaged impact as an array-like object of shape [n_features]
     """
-    imparray = numpy.asarray(impact, dtype=float)
+    imparray = numpy.asarray(impact)
     average = []
     for series in imparray.transpose():
         average.append(series.mean())
-    average = numpy.array(average, dtype=float)
+    average = numpy.array(average)
     if normalize:
         average /= average.sum()
     return average
@@ -75,7 +75,8 @@ class FeatureImpact(object):
         and binary classifiers.
 
         :param estimator: A scikit-learn estimator implementing predict()
-            which must return a single value per event
+            which must return a single value per event. It is assumed that
+            predict() does not change its input.
         :param X: Features. Array-like object of shape [n_samples, n_features]
         :param normalize: Whether to normalize the impact per event such that
             the sum of all impacts per event is one
@@ -87,38 +88,31 @@ class FeatureImpact(object):
                                      "or the quantiles explicitly assigned")
         if not hasattr(estimator, 'predict'):
             raise FeatureImpactError("estimator does not implement predict()")
-        X_ref = numpy.array(X, dtype=float)
-        y_ref = self._evaluate(estimator, X_ref)
-        result = []
-        for i in range(X_ref.shape[0]):
-            result_event = []
-            for j in range(X_ref.shape[1]):
-                impact = self._get_impact(estimator, X_ref, y_ref, i, j)
-                result_event.append(impact)
-            result.append(result_event)
-        result = numpy.array(result, dtype=float)
+        X_ref = numpy.asarray(X, dtype=float)
+        y_ref = numpy.asarray(estimator.predict(X_ref), dtype=float)
+        functor = lambda i, j: self._get_impact(estimator, X_ref, y_ref, i, j)
+        result = numpy.zeros((X_ref.shape[0], X_ref.shape[1]), dtype=float)
+        for i in range(result.shape[0]):
+            for j in range(result.shape[1]):
+                result[i, j] = functor(i, j)
         if normalize:
             result /= result.sum(axis=1)[:, numpy.newaxis]
         return result
 
     def _get_impact(self, est, X, y, event, feature):
-        X_star = numpy.array(X[event, :], dtype=float)
-        y_star = []
+        X_star = numpy.array(X[event, :])
+        impact = 0.
         for quantile in self._quantiles[feature]:
             X_star[feature] = quantile
-            y_star.append(abs(self._evaluate(est, [X_star]) - y[event]))
-        return numpy.mean(y_star)
+            y_star = numpy.asarray(est.predict([X_star]), dtype=float)
+            impact += numpy.abs(y_star - y[event]).sum()
+        return impact / (len(self._quantiles[feature]) * len(y))
 
     @staticmethod
     def _get_quantiles(X, n_quantiles):
         arange = numpy.arange(0.0001, 0.9999, 0.999 / (n_quantiles - 1))
         quantiles = [mquantiles(x, arange) for x in X.transpose()]
-        return numpy.array(quantiles, dtype=float)
-
-    @staticmethod
-    def _evaluate(estimator, X):
-        X = numpy.asarray(X)
-        return numpy.asarray(estimator.predict(X), dtype=float)
+        return numpy.array(quantiles)
 
 
 class FeatureImpactError(Exception):

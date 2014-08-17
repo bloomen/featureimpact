@@ -70,17 +70,10 @@ class Test(unittest.TestCase):
                            [0.33333333, 0.33333333, 0.33333333]], dtype=float)
         assert_array_almost_equal(exp, impact, 6)
 
-    def test__evaluate(self):
-        class M:
-            def predict(self, X):
-                return X
-        res = FeatureImpact._evaluate(estimator=M(), X=[1, 2, 3])
-        self.assertTrue((numpy.array([1, 2, 3]) == res).all())
-
     def test__get_impact(self):
         class M:
             def predict(self, X):
-                return 0.
+                return [0., 0., 0.]
         fi = FeatureImpact()
         X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
         fi.quantiles = X.transpose()

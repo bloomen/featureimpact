@@ -5,20 +5,18 @@ Performance tests for module featureimpact
 from __future__ import print_function
 import unittest
 import numpy
-from numpy.testing import assert_array_almost_equal
-from featureimpact import FeatureImpact, FeatureImpactError, \
-                          make_averaged_impact
+from featureimpact import FeatureImpact
 import time
 numpy.random.seed(1)
 
 
 class Model(object):
 
-    def __init__(self, size):
-        self._size = size
+    def __init__(self, y):
+        self._y = y
 
     def predict(self, X):
-        return numpy.random.rand(self._size)
+        return self._y
 
 
 class Timer(object):
@@ -32,6 +30,9 @@ class Timer(object):
     def reset(self):
         self._start = time.time()
 
+    def out(self):
+        print("[%ss]" % self, end=' ')
+
     def __repr__(self):
         return "%d" % self.get()
 
@@ -40,24 +41,20 @@ def get_features(n_samples, n_features):
     X = []
     for _ in range(n_samples):
         X.append(numpy.random.rand(n_features))
-    return X
-
-
-def print_sec(value):
-    print("[%ss]" % value, end=' ')
+    return numpy.array(X, dtype=float)
 
 
 class Test(unittest.TestCase):
 
     def test_compute_impact_with_defaults(self):
-        n_samples = 100
+        n_samples = 1000
         n_features = 100
         X = get_features(n_samples, n_features)
         fi = FeatureImpact()
         fi.make_quantiles(X)
         timer = Timer()
-        fi.compute_impact(Model(n_samples), X)
-        print_sec(timer)
+        fi.compute_impact(Model(numpy.random.rand(n_samples)), X)
+        timer.out()
 
 
 if __name__ == '__main__':
