@@ -29,7 +29,5 @@ setup(
         "Topic :: Software Development"
         ],
     long_description=file('README.txt').read(),
-    install_requires=['numpy>=1.6.1',
-                      'scipy>=0.9.0',
-                      'scikit-learn>=0.13']
+    install_requires=['numpy>=1.6.1', 'scipy>=0.9.0']
 )
