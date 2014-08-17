@@ -12,15 +12,14 @@ def make_averaged_impact(impact, normalize=False):
     :param impact: Array-like object of shape [n_samples, n_features].
         This should be the return value of FeatureImpact.compute_impact()
     :param normalize: Whether to normalize the averaged impacts such that
-        they sum up to one
+        that the impacts sum up to one
 
     :returns: The averaged impact as an array-like object of shape [n_features]
     """
-    imparray = numpy.asarray(impact)
-    average = []
-    for series in imparray.transpose():
-        average.append(series.mean())
-    average = numpy.array(average)
+    imparray = numpy.asarray(impact).transpose()
+    average = numpy.zeros((imparray.shape[0],), dtype=float)
+    for i, series in enumerate(imparray):
+        average[i] = series.mean()
     if normalize:
         average /= average.sum()
     return average
