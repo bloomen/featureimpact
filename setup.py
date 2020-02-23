@@ -7,16 +7,16 @@ import sys
 version = 'VERSION.txt'
 if sys.argv[1] == 'sdist':
     check_call(['git', 'describe', '--tags', '--dirty=M'],
-               stdout=file(version, 'w'), stderr=PIPE)
+               stdout=open(version, 'w'), stderr=PIPE)
 
 setup(
     name="featureimpact",
     packages=["featureimpact"],
-    version=file(version).read().strip(),
+    version=open(version).read().strip(),
     description="Compute the statistical impact of features given a scikit-learn estimator",
     author="Christian Blume",
     author_email="chr.blume@gmail.com",
-    url="http://sourceforge.net/projects/featureimpact",
+    url="https://github.com/bloomen/featureimpact",
     license="MIT",
     keywords=["machine learning", "statistics", "scikit-learn"],
     classifiers=[
@@ -28,6 +28,6 @@ setup(
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development"
         ],
-    long_description=file('README.txt').read(),
-    install_requires=['numpy>=1.6.1', 'scipy>=0.9.0']
+    long_description=open('README.md').read(),
+    requires=['numpy', 'scipy'],
 )

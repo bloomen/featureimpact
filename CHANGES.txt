@@ -1,3 +1,7 @@
+1.2.0
+
+- made featureimpact Python3 ready
+
 1.1.0
 
 - it is now assumed that predict() does not change its input

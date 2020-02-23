@@ -49,7 +49,7 @@ impact = featimp.compute_impact(model, X_test)
 # Comparing averaged impact to LinReg's coefficients
 ave_imp = make_averaged_impact(impact, normalize=True)
 for i, imp in enumerate(ave_imp):
-    print i, imp, coefs[i]
+    print(i, imp, coefs[i])
 
 # Plotting
 pylab.figure()

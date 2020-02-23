@@ -5,3 +5,4 @@ dist
 MANIFEST
 venv
 VERSION.txt
+build/
