@@ -16,25 +16,22 @@ class Model(object):
         self._y = y
 
     def predict(self, X):
-        return self._y
+        if len(X) > 1:
+            return self._y
+        else:
+            return numpy.random.random()
 
 
 class Timer(object):
 
     def __init__(self):
-        self._start = time.time()
-
-    def get(self):
-        return time.time() - self._start
+        self.reset()
 
     def reset(self):
         self._start = time.time()
 
-    def out(self):
-        print("[%ss]" % self, end=' ')
-
     def __repr__(self):
-        return "%d" % self.get()
+        return "{}s".format(round(time.time() - self._start, 2))
 
 
 def get_features(n_samples, n_features):
@@ -46,27 +43,27 @@ def get_features(n_samples, n_features):
 
 class Test(unittest.TestCase):
 
-    def test_compute_impact_with_defaults(self):
+    def _run(self, normalize=False):
         n_samples = 1000
         n_features = 100
         X = get_features(n_samples, n_features)
         fi = FeatureImpact()
-        fi.make_quantiles(X)
         timer = Timer()
-        imp = fi.compute_impact(Model(numpy.random.rand(n_samples)), X)
-        make_averaged_impact(imp)
-        timer.out()
+        fi.make_quantiles(X)
+        print('')
+        print("make_quantiles: {}".format(timer))
+        timer.reset()
+        imp = fi.compute_impact(Model(numpy.random.rand(n_samples)), X, normalize)
+        print("compute_impact: {}".format(timer))
+        timer.reset()
+        make_averaged_impact(imp, normalize)
+        print("make_averaged_impact: {}".format(timer))
 
-    def test_compute_impact_with_normalize(self):
-        n_samples = 1000
-        n_features = 100
-        X = get_features(n_samples, n_features)
-        fi = FeatureImpact()
-        fi.make_quantiles(X)
-        timer = Timer()
-        imp = fi.compute_impact(Model(numpy.random.rand(n_samples)), X, True)
-        make_averaged_impact(imp, True)
-        timer.out()
+    def test_with_defaults(self):
+        self._run()
+
+    def __test_with_normalize(self):
+        self._run(True)
 
 
 if __name__ == '__main__':
