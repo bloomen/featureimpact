@@ -91,7 +91,7 @@ class Test(unittest.TestCase):
         X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
         fi.quantiles = X.transpose()
         y = numpy.array([1, 2, 3], dtype=float)
-        impact = fi._get_impact(M(), X, y, event=1, feature=0)
+        impact = fi._get_impact(M(), 'predict', X, y, event=1, feature=0)
         self.assertEqual(2, impact)
 
     def test_make_averaged_impact(self):

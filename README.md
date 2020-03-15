@@ -1,7 +1,8 @@
 **featureimpact** let's you compute the statistical impact of features given
-a scikit-learn estimator. The computation is based on the mean variation 
-of the difference between quantile and original predictions. The estimator must implement `predict()` returning purely numerical values. All features must
-also consist of purely numerical values.
+a trained estimator. The computation is based on the mean variation
+of the difference between quantile and original predictions. The estimator must
+predict purely numerical values. All features must also consist of purely
+numerical values.
 
 Example:
 ```python

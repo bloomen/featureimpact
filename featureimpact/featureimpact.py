@@ -1,5 +1,5 @@
 """
-Compute the statistical impact of features given a scikit-learn estimator
+Compute the statistical impact of features given a trained estimator
 """
 from scipy.stats.mstats import mquantiles
 import numpy
@@ -27,7 +27,7 @@ def make_averaged_impact(impact, normalize=False):
 
 class FeatureImpact(object):
     """
-    Compute the statistical impact of features given a scikit-learn estimator
+    Compute the statistical impact of features given a trained estimator
     """
     def __init__(self):
         self._quantiles = None
@@ -63,31 +63,34 @@ class FeatureImpact(object):
             raise FeatureImpactError("n_quantiles must be at least three.")
         if len(X) < 3:
             raise FeatureImpactError("X must carry at least three events")
-        Xarray = numpy.asarray(X, dtype=float)
-        self._quantiles = self._get_quantiles(Xarray, n_quantiles)
+        X = numpy.asarray(X, dtype=float)
+        arange = numpy.arange(0.0001, 0.9999, 0.999 / (n_quantiles - 1))
+        quantiles = [mquantiles(x, arange) for x in X.transpose()]
+        self._quantiles = numpy.array(quantiles, dtype=float)
 
-    def compute_impact(self, estimator, X, normalize=False):
+    def compute_impact(self, estimator, X, normalize=False, method='predict'):
         """
         Computes the statistical impact of each feature based on the mean
         variation of the difference between quantile and original predictions.
         The impact is always >= 0.
 
-        :param estimator: A scikit-learn estimator implementing predict().
-            It is assumed that predict() does not change its input.
+        :param estimator: A trained estimator implementing the given predict `method`.
+            It is assumed that the predict method does not change its input.
         :param X: Features. Array-like object of shape [n_samples, n_features]
         :param normalize: Whether to normalize the impact per event such that
             the sum of all impacts per event is one.
+        :param method: The predict method to call on `estimator`.
 
         :returns: Impact. Array-like object of shape [n_samples, n_features]
         """
         if self._quantiles is None:
             raise FeatureImpactError("make_quantiles() must be called first "
                                      "or the quantiles explicitly assigned")
-        if not hasattr(estimator, 'predict'):
-            raise FeatureImpactError("estimator does not implement predict()")
+        if not hasattr(estimator, method):
+            raise FeatureImpactError("estimator does not implement {}()".format(method))
         X_ref = numpy.asarray(X, dtype=float)
-        y_ref = numpy.asarray(estimator.predict(X_ref), dtype=float)
-        functor = lambda i, j: self._get_impact(estimator, X_ref, y_ref, i, j)
+        y_ref = numpy.asarray(getattr(estimator, method)(X_ref), dtype=float)
+        functor = lambda i, j: self._get_impact(estimator, method, X_ref, y_ref, i, j)
         result = numpy.zeros((X_ref.shape[0], X_ref.shape[1]), dtype=float)
         for i in range(result.shape[0]):
             for j in range(result.shape[1]):
@@ -96,20 +99,14 @@ class FeatureImpact(object):
             result /= result.sum(axis=1)[:, numpy.newaxis]
         return result
 
-    def _get_impact(self, est, X, y, event, feature):
+    def _get_impact(self, est, method, X, y, event, feature):
         X_star = numpy.array(X[event, :])
         impact = 0.
         for quantile in self._quantiles[feature]:
             X_star[feature] = quantile
-            y_star = numpy.asarray(est.predict([X_star]), dtype=float)
+            y_star = numpy.asarray(getattr(est, method)([X_star]), dtype=float)
             impact += numpy.abs(y_star - y[event]).sum()
         return impact / (len(self._quantiles[feature]) * len(y))
-
-    @staticmethod
-    def _get_quantiles(X, n_quantiles):
-        arange = numpy.arange(0.0001, 0.9999, 0.999 / (n_quantiles - 1))
-        quantiles = [mquantiles(x, arange) for x in X.transpose()]
-        return numpy.array(quantiles)
 
 
 class FeatureImpactError(Exception):
