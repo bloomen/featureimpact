@@ -70,15 +70,13 @@ class FeatureImpact(object):
         """
         Computes the statistical impact of each feature based on the mean
         variation of the difference between quantile and original predictions.
-        The impact is always >= 0. The impact is reliable for regressors
-        and binary classifiers.
+        The impact is always >= 0.
 
-        :param estimator: A scikit-learn estimator implementing predict()
-            which must return a single value per event. It is assumed that
-            predict() does not change its input.
+        :param estimator: A scikit-learn estimator implementing predict().
+            It is assumed that predict() does not change its input.
         :param X: Features. Array-like object of shape [n_samples, n_features]
         :param normalize: Whether to normalize the impact per event such that
-            the sum of all impacts per event is one
+            the sum of all impacts per event is one.
 
         :returns: Impact. Array-like object of shape [n_samples, n_features]
         """

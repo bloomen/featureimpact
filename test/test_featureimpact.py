@@ -70,6 +70,19 @@ class Test(unittest.TestCase):
                            [0.33333333, 0.33333333, 0.33333333]], dtype=float)
         assert_array_almost_equal(exp, impact, 6)
 
+    def test_compute_impact_real_prediction_with_multiple_outputs(self):
+        class M:
+            def predict(self, X):
+                return [[0.5, 1.], [0.3, 2.], [0.1, 3.]]
+        fi = FeatureImpact()
+        X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
+        fi.quantiles = X.transpose()
+        impact = fi.compute_impact(M(), X, normalize=False)
+        exp = numpy.array([[1.2, 1.2, 1.2],
+                           [0.8, 0.8, 0.8],
+                           [1.2, 1.2, 1.2]], dtype=float)
+        assert_array_almost_equal(exp, impact, 6)
+
     def test__get_impact(self):
         class M:
             def predict(self, X):
