@@ -90,17 +90,20 @@ class FeatureImpact(object):
             raise FeatureImpactError("estimator does not implement {}()".format(method))
         X_ref = numpy.asarray(X, dtype=float)
         y_ref = numpy.asarray(getattr(estimator, method)(X_ref), dtype=float)
-        functor = lambda i, j: self._get_impact(estimator, method, X_ref, y_ref, i, j)
+        X_star = numpy.zeros((X_ref.shape[1],), dtype=float) # caching
+        functor = lambda i, j: self._get_impact(estimator, method, X_star, X_ref, y_ref, i, j)
         result = numpy.zeros((X_ref.shape[0], X_ref.shape[1]), dtype=float)
         for i in range(result.shape[0]):
             for j in range(result.shape[1]):
                 result[i, j] = functor(i, j)
         if normalize:
-            result /= result.sum(axis=1)[:, numpy.newaxis]
+            factors = result.sum(axis=1)[:, numpy.newaxis]
+            factors[factors == 0] = 1
+            result /= factors
         return result
 
-    def _get_impact(self, est, method, X, y, event, feature):
-        X_star = numpy.array(X[event, :])
+    def _get_impact(self, est, method, X_star, X, y, event, feature):
+        X_star[:] = X[event, :]
         impact = 0.
         for quantile in self._quantiles[feature]:
             X_star[feature] = quantile
