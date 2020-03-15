@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
     def test_with_defaults(self):
         self._run()
 
-    def __test_with_normalize(self):
+    def test_with_normalize(self):
         self._run(True)
 
 
