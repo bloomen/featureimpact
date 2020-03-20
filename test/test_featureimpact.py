@@ -4,6 +4,7 @@ Unit tests for module featureimpact
 """
 import unittest
 import numpy
+import pandas
 from numpy.testing import assert_array_almost_equal
 from featureimpact import FeatureImpact, FeatureImpactError, \
                           make_averaged_impact
@@ -94,19 +95,6 @@ class Test(unittest.TestCase):
                            [1./3., 1./3., 1./3.],
                            [2./3., 2./3., 2./3.]], dtype=float)
         assert_array_almost_equal(exp, impact, 6)
-
-    def test__get_impact(self):
-        class M:
-            def predict(self, X):
-                assert(len(X) == 1)
-                return 0.
-        fi = FeatureImpact()
-        X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
-        fi.quantiles = X.transpose()
-        y = numpy.array([1, 2, 3], dtype=float)
-        X_star = numpy.zeros((X.shape[1],), dtype=float)
-        impact = fi._get_impact(M(), 'predict', X_star, X, y, event=1, feature=0)
-        self.assertEqual(2./3., impact)
 
     def test_make_averaged_impact(self):
         impact = []
