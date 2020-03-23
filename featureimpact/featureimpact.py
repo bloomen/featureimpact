@@ -103,7 +103,7 @@ class FeatureImpact(object):
         return result
 
     def _get_impact(self, est, method, X_star, X, y, event, feature):
-#        X_star.values[0, :] = numpy.array(X.values[event, :], dtype=float)
+        X_star.values[0, :] = numpy.array(X.values[event, :], dtype=float)
         impact = 0.
         for quantile in self._quantiles[feature]:
             X_star.values[0, feature] = quantile
