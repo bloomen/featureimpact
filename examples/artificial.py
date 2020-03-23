@@ -46,7 +46,7 @@ for i, imp in enumerate(impact_linreg):
     print(i, imp, coefs_linreg[i])
 
 print("Impact vs RandomForestRegressor coeffs:")
-for i, imp in enumerate(impact_linreg):
+for i, imp in enumerate(impact_forest):
     print(i, imp, coefs_forest[i])
 
 print("Impact on SVR:")
