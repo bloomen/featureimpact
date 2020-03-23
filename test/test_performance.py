@@ -5,7 +5,7 @@ Performance tests for module featureimpact
 from __future__ import print_function
 import unittest
 import numpy
-from featureimpact import FeatureImpact, make_averaged_impact
+from featureimpact import FeatureImpact
 import time
 numpy.random.seed(1)
 
@@ -15,11 +15,8 @@ class Model(object):
     def __init__(self, y):
         self._y = y
 
-    def predict(self, X):
-        if len(X) > 1:
-            return self._y
-        else:
-            return numpy.random.random()
+    def predict(self, _):
+        return self._y
 
 
 class Timer(object):
@@ -43,8 +40,8 @@ def get_features(n_samples, n_features):
 
 class Test(unittest.TestCase):
 
-    def _run(self, normalize=False):
-        n_samples = 1000
+    def test(self):
+        n_samples = 10000
         n_features = 100
         X = get_features(n_samples, n_features)
         fi = FeatureImpact()
@@ -53,17 +50,8 @@ class Test(unittest.TestCase):
         print('')
         print("make_quantiles: {}".format(timer))
         timer.reset()
-        imp = fi.compute_impact(Model(numpy.random.rand(n_samples)), X, normalize)
+        imp = fi.compute_impact(Model(numpy.random.rand(n_samples)), X)
         print("compute_impact: {}".format(timer))
-        timer.reset()
-        make_averaged_impact(imp, normalize)
-        print("make_averaged_impact: {}".format(timer))
-
-    def test_with_defaults(self):
-        self._run()
-
-    def test_with_normalize(self):
-        self._run(True)
 
 
 if __name__ == '__main__':

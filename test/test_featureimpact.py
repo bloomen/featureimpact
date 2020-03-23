@@ -7,7 +7,7 @@ import numpy
 import pandas
 from numpy.testing import assert_array_almost_equal
 from featureimpact import FeatureImpact, FeatureImpactError, \
-                          make_averaged_impact
+                          averaged_impact
 
 
 class Test(unittest.TestCase):
@@ -23,86 +23,54 @@ class Test(unittest.TestCase):
     def test_make_quantiles(self):
         fi = FeatureImpact()
         self.assertRaises(FeatureImpactError, fi.make_quantiles,
-                          X=[], n_quantiles=2)
-        self.assertRaises(FeatureImpactError, fi.make_quantiles,
-                          X=[[1, 2]], n_quantiles=3)
+                          X=[], n_quantiles=0)
         X = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         fi.make_quantiles(X, n_quantiles=3)
         quants = fi.quantiles
-        exp = numpy.transpose(X)
-        assert_array_almost_equal(exp, quants, 2)
+        exp = numpy.array([[1.6, 4., 6.4],
+                           [2.6, 5., 7.4],
+                           [3.6, 6., 8.4]])
+        assert_array_almost_equal(exp, quants, 6)
 
     def test_compute_impact_zero_prediction(self):
         class M:
-            def predict(self, X):
-                if len(X) == 3:
-                    return [0., 0., 0.]
-                else:
-                    return 0.
+            def predict(self, _):
+                return numpy.array([0., 0., 0.])
         fi = FeatureImpact()
         X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
         fi.quantiles = X.transpose()
-        impact = fi.compute_impact(M(), X, normalize=False)
+        impact = fi.compute_impact(M(), X)
         exp = numpy.array([[0, 0, 0],
                            [0, 0, 0],
                            [0, 0, 0]], dtype=float)
-        self.assertTrue((exp == impact).all())
+        assert_array_almost_equal(exp, impact, 6)
 
     def test_compute_impact_real_prediction(self):
         class M:
+            def __init__(self):
+                self._i = 0
             def predict(self, X):
-                if len(X) == 3:
-                    return [1., 2., 3.]
-                else:
-                    return 1.
+                if self._i >= X.shape[1]:
+                    self._i = 0
+                y = numpy.array(X.iloc[:, self._i])
+                self._i += 1
+                return y
         fi = FeatureImpact()
         X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
         fi.quantiles = X.transpose()
-        impact = fi.compute_impact(M(), X, normalize=False)
-        exp = numpy.array([[0., 0., 0.],
-                           [1./3., 1./3., 1./3.],
-                           [2./3., 2./3., 2./3.]], dtype=float)
+        impact = fi.compute_impact(M(), X)
+        exp = numpy.array([[0, 0.816497, 0],
+                           [0, 0, 0.816497],
+                           [0.816497, 0, 0]], dtype=float)
         assert_array_almost_equal(exp, impact, 6)
 
-    def test_compute_impact_real_prediction_normalize(self):
-        class M:
-            def predict(self, X):
-                if len(X) == 3:
-                    return [1., 2., 3.]
-                else:
-                    return 1.
-        fi = FeatureImpact()
-        X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
-        fi.quantiles = X.transpose()
-        impact = fi.compute_impact(M(), X, normalize=True)
-        exp = numpy.array([[0., 0., 0.],
-                           [1./3., 1./3., 1./3.],
-                           [1./3., 1./3., 1./3.]], dtype=float)
-        assert_array_almost_equal(exp, impact, 6)
-
-    def test_compute_impact_real_prediction_with_single_output(self):
-        class M:
-            def predict(self, X):
-                if len(X) == 3:
-                    return [1., 2., 3.]
-                else:
-                    return 1
-        fi = FeatureImpact()
-        X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
-        fi.quantiles = X.transpose()
-        impact = fi.compute_impact(M(), X, normalize=False)
-        exp = numpy.array([[0., 0., 0.],
-                           [1./3., 1./3., 1./3.],
-                           [2./3., 2./3., 2./3.]], dtype=float)
-        assert_array_almost_equal(exp, impact, 6)
-
-    def test_make_averaged_impact(self):
+    def test_averaged_impact(self):
         impact = []
-        self.assertTrue((numpy.array([]) == make_averaged_impact(impact)).all())
+        self.assertTrue((numpy.array([]) == averaged_impact(impact)).all())
         impact = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        impave = make_averaged_impact(impact)
+        impave = averaged_impact(impact, normalize=False)
         self.assertTrue((numpy.array([4, 5, 6]) == impave).all())
-        impavenorm = make_averaged_impact(impact, normalize=True)
+        impavenorm = averaged_impact(impact)
         exp = numpy.array([0.26666667, 1./3., 0.4])
         assert_array_almost_equal(exp, impavenorm, 6)
 
