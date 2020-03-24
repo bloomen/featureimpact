@@ -29,7 +29,7 @@ coefs_forest = forest.feature_importances_
 
 # Computing the impact
 fi = FeatureImpact()
-fi.make_quantiles(X)
+fi.select_samples(X)
 impact_linreg = averaged_impact(fi.compute_impact(linreg, X))
 impact_forest = averaged_impact(fi.compute_impact(forest, X))
 impact_svr = averaged_impact(fi.compute_impact(svr, X))

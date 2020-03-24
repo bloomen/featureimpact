@@ -5,6 +5,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
 import numpy
+import pandas
 
 # Generate some data
 X = []
@@ -18,6 +19,7 @@ X = numpy.array(X, dtype=float)
 y = numpy.array(y, dtype=float)
 
 X = StandardScaler().fit_transform(X)
+X = pandas.DataFrame(X, columns=["x1", "x2"])
 
 # Training
 linreg = LinearRegression()
@@ -36,7 +38,7 @@ coefs_forest = forest.feature_importances_
 
 # Computing the impact
 fi = FeatureImpact()
-fi.make_quantiles(X)
+fi.select_samples(X)
 impact_linreg = averaged_impact(fi.compute_impact(linreg, X))
 impact_forest = averaged_impact(fi.compute_impact(forest, X))
 impact_svr = averaged_impact(fi.compute_impact(svr, X))
