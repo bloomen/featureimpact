@@ -8,7 +8,7 @@ Example:
 ```
 from featureimpact import FeatureImpact
 fi = FeatureImpact()
-fi.select_samples(X_train)
+fi.make_quantiles(X_train)
 impact = fi.compute_impact(model, X_test)
 ```
 
@@ -20,4 +20,4 @@ The impact estimation of this package follows the approach in Section 3.9.2 of
 Blume, C., 2012: Statistical Learning To Model Stratospheric Variability. Doctoral thesis,
 Institute for Meteorology, Freie Universität Berlin. https://refubium.fu-berlin.de/handle/fub188/13901
 ```
-and extends it to compute the impact over a range of perturbations.
+and extends it to more than one quantile.
