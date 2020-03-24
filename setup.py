@@ -29,5 +29,5 @@ setup(
         "Topic :: Software Development"
         ],
     long_description=open('README.md').read(),
-    requires=['numpy', 'pandas'],
+    requires=['numpy', 'scipy', 'pandas'],
 )
