@@ -33,19 +33,18 @@ svr.fit(X, y)
 
 # Get linreg and forest coefficients
 coefs_linreg = numpy.abs(linreg.coef_)
-coefs_linreg /= coefs_linreg.sum()
 coefs_forest = forest.feature_importances_
 
 # Computing the impact
 fi = FeatureImpact()
-fi.select_samples(X)
-impact_linreg = averaged_impact(fi.compute_impact(linreg, X))
+fi.make_quantiles(X)
+impact_linreg = fi.compute_impact(linreg, X)
 impact_forest = averaged_impact(fi.compute_impact(forest, X))
 impact_svr = averaged_impact(fi.compute_impact(svr, X))
 
 print("Impact vs LinearRegression coeffs:")
 for i, imp in enumerate(impact_linreg):
-    print(i, imp, coefs_linreg[i])
+    print(i, impact_linreg[imp].mean(), coefs_linreg[i])
 
 print("Impact vs RandomForestRegressor coeffs:")
 for i, imp in enumerate(impact_forest):

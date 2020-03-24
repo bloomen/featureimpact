@@ -8,29 +8,28 @@ import pandas
 from numpy.testing import assert_array_almost_equal
 from featureimpact import FeatureImpact, FeatureImpactError, \
                           averaged_impact
-numpy.random.seed(42)
 
 
 class Test(unittest.TestCase):
 
-    def test_samples_property(self):
+    def test_quantiles_property(self):
         fi = FeatureImpact()
-        self.assertEqual(None, fi.samples)
-        fi.samples = []
-        assert_array_almost_equal(pandas.DataFrame([]), fi.samples, 6)
-        fi.samples = [[1, 2], [3, 4]]
-        assert_array_almost_equal(pandas.DataFrame([[1, 2], [3, 4]]), fi.samples, 6)
+        self.assertEqual(None, fi.quantiles)
+        fi.quantiles = []
+        assert_array_almost_equal(pandas.DataFrame([]), fi.quantiles, 6)
+        fi.quantiles = [[1, 2], [3, 4]]
+        assert_array_almost_equal(pandas.DataFrame([[1, 2], [3, 4]]), fi.quantiles, 6)
 
-    def test_select_samples(self):
+    def test_make_quantiles(self):
         fi = FeatureImpact()
-        self.assertRaises(FeatureImpactError, fi.select_samples,
-                          X=[], count=0)
+        self.assertRaises(FeatureImpactError, fi.make_quantiles,
+                          X=[], n_quantiles=0)
         X = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        fi.select_samples(X, count=3)
-        exp = [[1, 5, 3],
-               [4, 8, 6],
-               [7, 2, 9]]
-        assert_array_almost_equal(pandas.DataFrame(exp), fi.samples, 6)
+        fi.make_quantiles(X, n_quantiles=3)
+        exp = numpy.array([[1.6, 4., 6.4],
+                           [2.6, 5., 7.4],
+                           [3.6, 6., 8.4]])
+        assert_array_almost_equal(exp.transpose(), fi.quantiles, 6)
 
     def test_compute_impact_zero_prediction(self):
         class M:
@@ -38,6 +37,7 @@ class Test(unittest.TestCase):
                 return numpy.array([0., 0., 0.])
         fi = FeatureImpact()
         X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
+        fi.quantiles = X.transpose()
         impact = fi.compute_impact(M(), X)
         exp = numpy.array([[0, 0, 0],
                            [0, 0, 0],
@@ -56,6 +56,7 @@ class Test(unittest.TestCase):
                 return y
         fi = FeatureImpact()
         X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
+        fi.quantiles = X.transpose()
         impact = fi.compute_impact(M(), X)
         exp = numpy.array([[0, 0.816497, 0],
                            [0, 0, 0.816497],

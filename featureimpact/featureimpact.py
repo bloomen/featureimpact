@@ -1,15 +1,16 @@
 """
 Compute the statistical impact of features given a trained estimator
 """
+from scipy.stats.mstats import mquantiles
 import numpy
 import pandas
 
 
 def averaged_impact(impact, normalize=True):
     """
-    Computes the averaged impact across all samples for each feature
+    Computes the averaged impact across all quantiles for each feature
 
-    :param impact: Array-like object of shape [n_samples, n_features].
+    :param impact: Array-like object of shape [n_quantiles, n_features].
         This should be the return value of FeatureImpact.compute_impact()
     :param normalize: Whether to normalize the averaged impacts such that
         that the impacts sum up to one
@@ -30,41 +31,43 @@ class FeatureImpact(object):
     Compute the statistical impact of features given a trained estimator
     """
     def __init__(self):
-        self._samples = None
+        self._quantiles = None
 
     @property
-    def samples(self):
+    def quantiles(self):
         """
-        The samples corresponding to the features
+        The quantiles corresponding to the features
 
-        :returns: pandas.DataFrame of shape [n_samples, n_features] or None
+        :returns: pandas.DataFrame of shape [n_quantiles, n_features] or None
         """
-        return self._samples
+        return self._quantiles
 
-    @samples.setter
-    def samples(self, value):
+    @quantiles.setter
+    def quantiles(self, value):
         """
-        The samples corresponding to the features
+        The quantiles corresponding to the features
 
-        :param value: Array-like object of shape [n_samples, n_features] or None
+        :param value: Array-like object of shape [n_quantiles, n_features]
         """
-        self._samples = pandas.DataFrame(value) if value is not None else value
+        self._quantiles = pandas.DataFrame(value)
 
-    def select_samples(self, X, count=100, rng=numpy.random):
+    def make_quantiles(self, X, n_quantiles=9):
         """
-        Selects `count` samples randomly from each feature in X without replacement.
+        Generates the quantiles for each feature in X. The quantiles for one
+        feature are computed such that the area between quantiles is the
+        same throughout. The default quantiles are computed at the following
+        probablities: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9
 
-        :param X: Features. Array-like object of shape [n_obs, n_features]
-        :param count: The number of samples to select
-        :param rng: The random number generator to use
+        :param X: Features. Array-like object of shape [n_samples, n_features]
+        :param n_quantiles: The number of quantiles to compute
         """
-        if count < 1:
-            raise FeatureImpactError("count must be at least one.")
+        if n_quantiles < 1:
+            raise FeatureImpactError("n_quantiles must be at least one.")
         X = pandas.DataFrame(X)
-        count = count if count <= X.shape[0] else X.shape[0]
-        self._samples = pandas.DataFrame()
+        probs = numpy.linspace(0.0, 1.0, n_quantiles + 2)[1:-1]
+        self._quantiles = pandas.DataFrame()
         for col in X:
-            self._samples[col] = rng.choice(X[col], count, replace=False)
+            self._quantiles[col] = mquantiles(X[col], probs)
 
     def compute_impact(self, estimator, X, method='predict'):
         """
@@ -72,28 +75,27 @@ class FeatureImpact(object):
         variation of the difference between perturbed and original predictions.
         The impact is always >= 0.
 
-        If samples were not selected then all samples in X are used to
-        generate the perturbed predictions.
-
         :param estimator: A trained estimator implementing the given predict `method`.
             It is assumed that the predict method does not change its input.
-        :param X: Features. Array-like object of shape [n_obs, n_features]
+        :param X: Features. Array-like object of shape [n_samples, n_features]
         :param method: The predict method to call on `estimator`.
 
-        :returns: Impact as a pandas.DataFrame of shape [n_samples, n_features]
+        :returns: Impact as a pandas.DataFrame of shape [n_quantiles, n_features]
         """
+        if self._quantiles is None:
+            raise FeatureImpactError("make_quantiles() must be called first "
+                                     "or the quantiles explicitly assigned")
         if not hasattr(estimator, method):
             raise FeatureImpactError("estimator does not implement {}()".format(method))
         X = pandas.DataFrame(X)
         y = getattr(estimator, method)(X)
-        samples = self._samples if self._samples is not None else X
         impact = pandas.DataFrame()
         for feature in X:
             X_star = pandas.DataFrame(X, copy=True)
             x_std = X[feature].std()
             imp = []
-            for sample in samples[feature]:
-                X_star[feature] = sample
+            for quantile in self._quantiles[feature]:
+                X_star[feature] = quantile
                 y_star = getattr(estimator, method)(X_star)
                 imp.append(numpy.std(y - y_star) / x_std)
             impact[feature] = imp
