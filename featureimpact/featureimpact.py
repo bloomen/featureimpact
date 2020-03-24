@@ -18,7 +18,7 @@ def averaged_impact(impact, normalize=True):
     :returns: The averaged impact as a pandas.Series of shape [n_features]
     """
     impact = pandas.DataFrame(impact)
-    average = pandas.Series(index=impact.columns)
+    average = pandas.Series(index=impact.columns, dtype=float)
     for col in impact:
         average[col] = impact[col].mean()
     if normalize:
@@ -49,7 +49,7 @@ class FeatureImpact(object):
 
         :param value: Array-like object of shape [n_quantiles, n_features]
         """
-        self._quantiles = pandas.DataFrame(value)
+        self._quantiles = pandas.DataFrame(value, dtype=float)
 
     def make_quantiles(self, X, n_quantiles=9):
         """
@@ -65,7 +65,7 @@ class FeatureImpact(object):
             raise FeatureImpactError("n_quantiles must be at least one.")
         X = pandas.DataFrame(X)
         probs = numpy.linspace(0.0, 1.0, n_quantiles + 2)[1:-1]
-        self._quantiles = pandas.DataFrame()
+        self._quantiles = pandas.DataFrame(dtype=float)
         for col in X:
             self._quantiles[col] = mquantiles(X[col], probs)
 
@@ -89,16 +89,20 @@ class FeatureImpact(object):
             raise FeatureImpactError("estimator does not implement {}()".format(method))
         X = pandas.DataFrame(X)
         y = getattr(estimator, method)(X)
-        impact = pandas.DataFrame()
+        impact = pandas.DataFrame(dtype=float)
         for feature in X:
-            X_star = pandas.DataFrame(X, copy=True)
-            x_std = X[feature].std()
-            imp = []
-            for quantile in self._quantiles[feature]:
-                X_star[feature] = quantile
-                y_star = getattr(estimator, method)(X_star)
-                imp.append(numpy.std(y - y_star) / x_std)
+            orig_feat = pandas.Series(X[feature], copy=True)
+            x_std = orig_feat.std()
+            if x_std > 0.0:
+                imp = []
+                for quantile in self._quantiles[feature]:
+                    X[feature] = quantile
+                    y_star = getattr(estimator, method)(X)
+                    imp.append(numpy.std(y - y_star) / x_std)
+            else:
+                imp = [0.0] * self._quantiles.shape[0]
             impact[feature] = imp
+            X[feature] = orig_feat
         return impact
 
 
