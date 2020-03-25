@@ -92,13 +92,13 @@ class FeatureImpact(object):
         impact = pandas.DataFrame(dtype=float)
         for feature in X:
             orig_feat = pandas.Series(X[feature], copy=True)
-            x_std = orig_feat.std()
+            x_std = orig_feat.std(ddof=1)
             if x_std > 0.0:
                 imp = []
                 for quantile in self._quantiles[feature]:
                     X[feature] = quantile
                     y_star = getattr(estimator, method)(X)
-                    imp.append(numpy.std(y - y_star) / x_std)
+                    imp.append(numpy.std(y - y_star, ddof=1) / x_std)
             else:
                 imp = [0.0] * self._quantiles.shape[0]
             impact[feature] = imp

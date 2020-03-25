@@ -58,9 +58,9 @@ class Test(unittest.TestCase):
         X = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=float)
         fi.quantiles = X.transpose()
         impact = fi.compute_impact(M(), X)
-        exp = numpy.array([[0, 0.816497, 0],
-                           [0, 0, 0.816497],
-                           [0.816497, 0, 0]], dtype=float)
+        exp = numpy.array([[0, 1, 0],
+                           [0, 0, 1],
+                           [1, 0, 0]], dtype=float)
         assert_array_almost_equal(exp, impact, 6)
 
     def test_averaged_impact(self):
