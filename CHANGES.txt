@@ -1,3 +1,8 @@
+2.1.0
+
+- Added support for features with zero variance
+- Improved performance and less memory usage
+
 2.0.0
 
 - Switched to the procedure described in Blume, 2012 but normalized by
