@@ -67,7 +67,7 @@ class FeatureImpact(object):
         probs = numpy.linspace(0.0, 1.0, n_quantiles + 2)[1:-1]
         self._quantiles = pandas.DataFrame(dtype=float)
         for col in X:
-            self._quantiles[col] = mquantiles(X[col], probs)
+            self._quantiles[col] = mquantiles(X[col].dropna(), probs)
 
     def compute_impact(self, estimator, X, method='predict'):
         """
@@ -92,13 +92,17 @@ class FeatureImpact(object):
         impact = pandas.DataFrame(dtype=float)
         for feature in X:
             orig_feat = pandas.Series(X[feature], copy=True)
-            x_std = orig_feat.std(ddof=1)
+            x_std = orig_feat.std(skipna=True)
             if x_std > 0.0:
                 imp = []
                 for quantile in self._quantiles[feature]:
                     X[feature] = quantile
                     y_star = getattr(estimator, method)(X)
-                    imp.append(numpy.std(y - y_star, ddof=1) / x_std)
+                    diff_std = pandas.Series(y - y_star).std(skipna=True)
+                    if diff_std > 0.0:
+                        imp.append(diff_std / x_std)
+                    else:
+                        imp.append(0.0)
             else:
                 imp = [0.0] * self._quantiles.shape[0]
             impact[feature] = imp
