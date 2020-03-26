@@ -15,9 +15,5 @@ impact = fi.compute_impact(model, X_test)
 Note: In order to run the examples you'll need scikit-learn
 installed in addition to this package and its regular dependencies.
 
-The impact estimation of this package follows the approach in Section 3.9.2 of
-```
-Blume, C., 2012: Statistical Learning To Model Stratospheric Variability. Doctoral thesis,
-Institute for Meteorology, Freie Universität Berlin. https://refubium.fu-berlin.de/handle/fub188/13901
-```
-and extends it to more than one quantile.
+The algorithm is described in the following report:
+https://bloomen.github.io/pub/featureimpact.pdf
