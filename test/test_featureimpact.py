@@ -26,10 +26,8 @@ class Test(unittest.TestCase):
                           X=[], n_quantiles=0)
         X = [[1, 2, 3], [4, 2, 6], [7, 2, 9]]
         fi.make_quantiles(X, n_quantiles=3)
-        exp = numpy.array([[1.6, 4., 6.4],
-                           [2., 2., 2.],
-                           [3.6, 6., 8.4]])
-        assert_array_almost_equal(exp.transpose(), fi.quantiles, 6)
+        exp = numpy.array(X)
+        assert_array_almost_equal(exp, fi.quantiles, 6)
 
     def test_compute_impact_zero_prediction(self):
         class M:

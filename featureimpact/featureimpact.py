@@ -58,6 +58,11 @@ class FeatureImpact(object):
         same throughout. The default quantiles are computed at the following
         probablities: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9
 
+        The actual quantiles being used are the values that are closest to the
+        computed quantiles. This ensures only values are used that are actually
+        part of the features, particularly important for distributions with
+        multiple peaks (e.g. categorical features).
+
         :param X: Features. Array-like object of shape [n_samples, n_features]
         :param n_quantiles: The number of quantiles to compute
         """
@@ -67,7 +72,12 @@ class FeatureImpact(object):
         probs = numpy.linspace(0.0, 1.0, n_quantiles + 2)[1:-1]
         self._quantiles = pandas.DataFrame(dtype=float)
         for col in X:
-            self._quantiles[col] = mquantiles(X[col].dropna(), probs)
+            feature = X[col].dropna().values
+            values = []
+            for quantile in mquantiles(feature, probs):
+                closest = numpy.abs(feature - quantile).argmin()
+                values.append(feature[closest])
+            self._quantiles[col] = values
 
     def compute_impact(self, estimator, X, method='predict'):
         """
@@ -95,14 +105,12 @@ class FeatureImpact(object):
             x_std = orig_feat.std(skipna=True)
             if x_std > 0.0:
                 imp = []
-                for quantile in self._quantiles[feature]:
+                for quantile, count in self._quantiles[feature].value_counts().iteritems():
                     X[feature] = quantile
                     y_star = getattr(estimator, method)(X)
                     diff_std = pandas.Series(y - y_star).std(skipna=True)
-                    if diff_std > 0.0:
-                        imp.append(diff_std / x_std)
-                    else:
-                        imp.append(0.0)
+                    res = diff_std / x_std if diff_std > 0.0 else 0.0
+                    imp.extend([res] * count)
             else:
                 imp = [0.0] * self._quantiles.shape[0]
             impact[feature] = imp
