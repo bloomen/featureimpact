@@ -15,5 +15,5 @@ impact = fi.compute_impact(model, X_test)
 Note: In order to run the examples you'll need scikit-learn
 installed in addition to this package and its regular dependencies.
 
-The algorithm is described in the following report:
+The algorithm is described here:
 https://bloomen.github.io/pub/featureimpact.pdf
