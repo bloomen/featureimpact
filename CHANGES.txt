@@ -1,3 +1,8 @@
+2.2.0
+
+- Ensure we only use quantiles that are part of the features
+- Added link to doc describing the algorithm
+
 2.1.0
 
 - Added support for features with zero variance
