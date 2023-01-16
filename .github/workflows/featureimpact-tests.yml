@@ -11,6 +11,7 @@ jobs:
         uses: actions/checkout@v2
       - name: run tests
         run: |
+          git fetch --depth=500
           git fetch --tags
           python3 setup.py sdist
           pip3 install dist/*.gz
