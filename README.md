@@ -1,6 +1,6 @@
 # featureimpact
 
-[![Actions](https://github.com/bloomen/featureimpact/actions/workflows/featureimpact-tests.yml/badge.svg?branch=main)](https://github.com/bloomen/featureimpact/actions/workflows/featureimpact-tests.yml?query=branch%3Amain)
+[![Actions](https://github.com/bloomen/featureimpact/actions/workflows/featureimpact-tests.yml/badge.svg?branch=master)](https://github.com/bloomen/featureimpact/actions/workflows/featureimpact-tests.yml?query=branch%3Amaster)
 
 featureimpact let's you compute the statistical impact of features given
 a trained estimator. The computation is based on the mean variation
