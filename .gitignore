@@ -6,3 +6,4 @@ MANIFEST
 venv
 VERSION.txt
 build/
+*.egg-info/
