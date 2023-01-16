@@ -14,6 +14,6 @@ jobs:
           git fetch --depth=500
           git fetch --tags
           python3 setup.py sdist
-          pip3 install dist/*.gz
+          pip3 install featureimpact -f dist/
           pip3 install sklearn nose2
           nose2 -v test
