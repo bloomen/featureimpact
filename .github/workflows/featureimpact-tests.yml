@@ -15,4 +15,5 @@ jobs:
           git fetch --tags
           pip3 install -e .
           pip3 install sklearn nose2
+          python3 setup.py install
           nose2 -v test
