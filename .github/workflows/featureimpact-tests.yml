@@ -4,7 +4,7 @@ jobs:
   tests:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout repo
@@ -13,9 +13,7 @@ jobs:
         run: |
           git fetch --depth=500
           git fetch --tags
-          python3 -m venv venv
-          source venv/bin/activate
-          pip3 install -e .
+          python3 setup.py sdist
+          pip3 install dist/*.gz
           pip3 install sklearn nose2
-          python3 setup.py install
           nose2 -v test
