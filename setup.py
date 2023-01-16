@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 from distutils.core import setup
 from subprocess import check_call, PIPE
+import os
 import sys
 
 
 version = 'VERSION.txt'
-if sys.argv[1] == 'sdist':
+if os.path.exists('.git'):
     check_call(['git', 'describe', '--tags', '--dirty=M'],
                stdout=open(version, 'w'), stderr=PIPE)
 
