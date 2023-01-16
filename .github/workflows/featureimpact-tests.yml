@@ -1,0 +1,16 @@
+name: featureimpact
+on: [push]
+jobs:
+  tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v2
+      - name: run tests
+        run: |
+          python3 setup.py install
+          pip3 install sklearn nose2
+          nose2 -v test

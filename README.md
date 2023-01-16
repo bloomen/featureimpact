@@ -1,11 +1,15 @@
-**featureimpact** let's you compute the statistical impact of features given
+# featureimpact
+
+[![Actions](https://github.com/bloomen/featureimpact/actions/workflows/featureimpact-tests.yml/badge.svg?branch=main)](https://github.com/bloomen/featureimpact/actions/workflows/featureimpact-tests.yml?query=branch%3Amain)
+
+featureimpact let's you compute the statistical impact of features given
 a trained estimator. The computation is based on the mean variation
 of the difference between perturbed and original predictions. The estimator must
 predict purely numerical values. All features must also consist of purely
 numerical values.
 
 Example:
-```
+```python
 from featureimpact import FeatureImpact
 fi = FeatureImpact()
 fi.make_quantiles(X_train)

@@ -105,7 +105,7 @@ class FeatureImpact(object):
             x_std = orig_feat.std(skipna=True)
             if x_std > 0.0:
                 imp = []
-                for quantile, count in self._quantiles[feature].value_counts().iteritems():
+                for quantile, count in self._quantiles[feature].value_counts().items():
                     X[feature] = quantile
                     y_star = getattr(estimator, method)(X)
                     diff_std = pandas.Series(y - y_star).std(skipna=True)
