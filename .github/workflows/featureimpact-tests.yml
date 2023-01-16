@@ -13,6 +13,8 @@ jobs:
         run: |
           git fetch --depth=500
           git fetch --tags
+          virtualenv venv
+          source venv/bin/activate
           pip3 install -e .
           pip3 install sklearn nose2
           python3 setup.py install
