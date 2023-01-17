@@ -15,5 +15,5 @@ jobs:
           git fetch --tags
           python3 setup.py sdist
           pip3 install dist/*.gz
-          pip3 install sklearn nose2
+          pip3 install scikit-learn nose2
           nose2 -v test
