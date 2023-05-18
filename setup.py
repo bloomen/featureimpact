@@ -1,19 +1,11 @@
 #!/usr/bin/env python
 from distutils.core import setup
-from subprocess import check_call, PIPE
-import os
-import sys
 
-
-version = 'VERSION.txt'
-if os.path.exists('.git'):
-    check_call(['git', 'describe', '--tags', '--dirty=M'],
-               stdout=open(version, 'w'), stderr=PIPE)
 
 setup(
     name="featureimpact",
     packages=["featureimpact"],
-    version=open(version).read().strip(),
+    version="2.2.2",
     description="Compute the statistical impact of features given a trained estimator",
     author="Christian Blume",
     author_email="chr.blume@gmail.com",
